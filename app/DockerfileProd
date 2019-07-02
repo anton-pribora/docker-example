@@ -1,0 +1,31 @@
+FROM node:10-slim
+
+WORKDIR /app
+
+# Устанавливаем встроенный в ноду HTTP-сервера
+RUN npm install -g serve
+
+# Устанавливаем netcat
+RUN apt-get update \
+  && apt-get install -y iputils-ping netcat \
+  && apt-get clean \
+  && rm -rf /tmp/* /var/lib/apt/lists/*
+
+# Точка входа для запуска сервиса с задержкой в 10 секунд
+RUN echo "#!/bin/sh\n\
+  echo Ждём 10 секунд перед стартом HTTP-сервера \n\
+  sleep 10\n\
+  cd /app\n\
+  serve -s build -l 4000" > /start.sh \
+  && chmod +x /start.sh
+  
+# Копируем исходный код в контейнер
+COPY . /app
+
+# Собираем приложение внутри контейнера
+RUN cd /app \
+    && date > build_date.txt \
+    && yarn install \
+    && yarn build
+
+ENTRYPOINT ["/start.sh"]

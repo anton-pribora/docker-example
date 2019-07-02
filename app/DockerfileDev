@@ -1,0 +1,12 @@
+FROM node:10-slim
+
+WORKDIR /app
+
+# Точка входа для запуска сервиса
+RUN echo "#!/bin/sh\n\
+  cd /app\n\
+  # Запуск с установкой компонентов реакта\n\
+  yarn install && yarn start" > /start.sh \
+  && chmod +x /start.sh
+
+ENTRYPOINT ["/start.sh"]
